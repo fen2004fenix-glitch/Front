@@ -1,0 +1,55 @@
+import { account, ID } from './appwrite';
+
+export interface User {
+  $id: string;
+  email: string;
+  name: string;
+}
+
+export class AuthService {
+  async register(email: string, password: string, name: string): Promise<User> {
+    try {
+      await account.create(ID.unique(), email, password, name);
+      return await this.login(email, password);
+    } catch (error) {
+      throw new Error(`Registration failed: ${error}`);
+    }
+  }
+
+  async login(email: string, password: string): Promise<User> {
+    try {
+      await account.createEmailPasswordSession(email, password);
+      const user = await account.get();
+      return user as User;
+    } catch (error) {
+      throw new Error(`Login failed: ${error}`);
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await account.deleteSession('current');
+    } catch (error) {
+      throw new Error(`Logout failed: ${error}`);
+    }
+  }
+
+  async getCurrentUser(): Promise<User | null> {
+    try {
+      return await account.get() as User;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async isLoggedIn(): Promise<boolean> {
+    try {
+      const user = await this.getCurrentUser();
+      return !!user;
+    } catch {
+      return false;
+    }
+  }
+}
+
+export const authService = new AuthService();

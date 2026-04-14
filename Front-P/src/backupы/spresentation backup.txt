@@ -1,0 +1,239 @@
+// src/presentation.ts
+export type { Presentation, Slide, TextElement, ImageElement, Element, SlideId, ElementId } from "./types";
+import type {
+  Presentation as PresentationT,
+  Slide as SlideT,
+  SlideId as SlideIdT,
+  Element as ElementT,
+  TextElement as TextElementT,
+  ElementId as ElementIdT,
+  Position as PositionT,
+  Size as SizeT,
+  ImageElement as ImageElementT,
+} from "./types";
+
+/* Type guards */
+export function isTextElement(el: ElementT): el is TextElementT {
+  return (el as TextElementT).type === "text";
+}
+export function isImageElement(el: ElementT): el is ImageElementT {
+  return (el as ImageElementT).type === "image";
+}
+
+/* Presentation operations (full implementation) */
+
+/* Изменение названия презентации */
+export function setPresentationTitle(p: PresentationT, newTitle: string): PresentationT {
+  return { ...p, title: newTitle };
+}
+
+/* Добавление слайда */
+export function addSlide(p: PresentationT, slide: SlideT, index?: number): PresentationT {
+  const slides = [...p.slides];
+  if (index === undefined || index < 0 || index > slides.length) {
+    slides.push(slide);
+  } else {
+    slides.splice(index, 0, slide);
+  }
+  return { ...p, slides };
+}
+
+/* Удаление слайда */
+export function removeSlide(p: PresentationT, slideId: SlideIdT): PresentationT {
+  return { ...p, slides: p.slides.filter((s) => s.id !== slideId) };
+}
+
+/* Перемещение слайда (иммутабельный вариант, безопасный) */
+export function moveSlide(p: PresentationT, slideId: SlideIdT, newIndex: number): PresentationT {
+  const slides = [...p.slides];
+  const oldIndex = slides.findIndex((s) => s.id === slideId);
+  if (oldIndex === -1 || newIndex < 0 || newIndex >= slides.length) {
+    return p;
+  }
+
+  const removed = slides.splice(oldIndex, 1);
+  const removedSlide = removed[0];
+  if (removedSlide === undefined) return p;
+
+  slides.splice(newIndex, 0, removedSlide);
+  return { ...p, slides };
+}
+
+/* Мутабельный in-place swap (безопасный) */
+export function moveSlideInPlace(slide: SlideT, slides: SlideT[]): void {
+  const index = slides.indexOf(slide);
+  if (index === -1 || index >= slides.length - 1) return;
+  const next = slides[index + 1];
+  if (next === undefined) return;
+  slides[index + 1] = slide;
+  slides[index] = next;
+}
+
+/* Вставка копии слайда (create) — безопасно обрабатывает undefined */
+export function create(presentation: PresentationT, slideId: SlideIdT, slideIndex: number): PresentationT {
+  const found = presentation.slides.find((s) => s.id === slideId);
+  if (found === undefined) return presentation;
+  const slideFound: SlideT = found;
+  const slides = [
+    ...presentation.slides.slice(0, slideIndex),
+    slideFound,
+    ...presentation.slides.slice(slideIndex),
+  ];
+  return { ...presentation, slides };
+}
+
+/* Вспомогательный обновлятор элемента */
+function updateElement(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  updater: (el: ElementT) => ElementT,
+): PresentationT {
+  const slides = p.slides.map((slide) => {
+    if (slide.id !== slideId) return slide;
+    const elements = slide.elements.map((el) => (el.id === elementId ? updater(el) : el));
+    return { ...slide, elements: [...elements] };
+  });
+  return { ...p, slides: [...slides] };
+}
+
+/* Добавление элемента */
+export function addElement(p: PresentationT, slideId: SlideIdT, element: ElementT): PresentationT {
+  const slides = p.slides.map((slide) =>
+    slide.id !== slideId ? slide : { ...slide, elements: [...slide.elements, element] },
+  );
+  return { ...p, slides: [...slides] };
+}
+
+/* Удаление элемента */
+export function removeElement(p: PresentationT, slideId: SlideIdT, elementId: ElementIdT): PresentationT {
+  const slides = p.slides.map((slide) =>
+    slide.id !== slideId
+      ? slide
+      : { ...slide, elements: slide.elements.filter((el) => el.id !== elementId) },
+  );
+  return { ...p, slides: [...slides] };
+}
+
+/* Перемещение элемента (обновление позиции) */
+export function moveElement(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  newPosition: PositionT,
+): PresentationT {
+  return updateElement(p, slideId, elementId, (el) => ({ ...el, position: newPosition }));
+}
+
+/* Изменение размера элемента */
+export function resizeElement(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  newSize: SizeT,
+): PresentationT {
+  return updateElement(p, slideId, elementId, (el) => ({ ...el, size: newSize }));
+}
+
+/* Изменение содержимого текста */
+export function updateTextContent(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  newText: string,
+): PresentationT {
+  return updateElement(p, slideId, elementId, (el) => (isTextElement(el) ? { ...el, content: newText } : el));
+}
+
+/* Изменение размера шрифта */
+export function updateTextSize(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  newFontSize: number,
+): PresentationT {
+  return updateElement(p, slideId, elementId, (el) => (isTextElement(el) ? { ...el, fontSize: newFontSize } : el));
+}
+
+/* Изменение семейства шрифта */
+export function updateTextFontFamily(
+  p: PresentationT,
+  slideId: SlideIdT,
+  elementId: ElementIdT,
+  newFontFamily: string,
+): PresentationT {
+  return updateElement(p, slideId, elementId, (el) =>
+    isTextElement(el) ? { ...el, fontFamily: newFontFamily } : el,
+  );
+}
+
+/* Изменение фона слайда */
+export function updateSlideBackground(
+  p: PresentationT,
+  slideId: SlideIdT,
+  newBackground: string,
+): PresentationT {
+  const slides = p.slides.map((slide) => (slide.id === slideId ? { ...slide, background: newBackground } : slide));
+  return { ...p, slides: [...slides] };
+}
+
+// Файл: src/types.ts
+
+// Фрагмент:
+// /* Общий тип для элементов */
+// export type Element = TextElement | ImageElement;
+
+// Использование spread-оператора — return { ...p, slides }
+// Файлы и фрагменты:
+
+// src/presentation.ts — setPresentationTitle
+
+// export function setPresentationTitle(p: PresentationT, newTitle: string): PresentationT {
+//   return { ...p, title: newTitle };
+// }
+
+// src/presentation.ts — addSlide / moveSlide / create / updateElement / addElement / removeElement / updateSlideBackground Во всех этих функциях результат возвращается как:
+
+// return { ...p, slides };
+
+// Использование spread-оператора — const slides = [...p.slides]
+// Файл: src/presentation.ts
+
+// Фрагменты (примеры):
+
+// addSlide:
+
+// export function addSlide(p: PresentationT, slide: SlideT, index?: number): PresentationT {
+//   const slides = [...p.slides];
+//   ...
+//   return { ...p, slides };
+// }
+// moveSlide:
+
+// export function moveSlide(p: PresentationT, slideId: SlideIdT, newIndex: number): PresentationT {
+//   const slides = [...p.slides];
+//   ...
+//   return { ...p, slides };
+// }
+// create:
+
+// const slides = [
+//   ...presentation.slides.slice(0, slideIndex),
+//   slideFound,
+//   ...presentation.slides.slice(slideIndex),
+// ];
+// return { ...presentation, slides };
+// Использование spread-оператора — { ...slide, elements: [...slide.elements, element] }
+// Файл: src/presentation.ts
+
+// Фрагмент — addElement:
+
+// export function addElement(p: PresentationT, slideId: SlideIdT, element: ElementT): PresentationT {
+//   const slides = p.slides.map((slide) =>
+//     slide.id !== slideId ? slide : { ...slide, elements: [...slide.elements, element] },
+//   );
+//   return { ...p, slides: [...slides] };
+// }
+// Также аналогичные patterns используются в updateElement и removeElement, где при изменении элементов возвращается новый объект с:
+
+// { ...slide, elements: [...elements] }

@@ -1,0 +1,856 @@
+/* Reset / базовые стили */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  box-sizing: border-box;
+}
+
+/* Global */
+button { cursor: pointer; }
+
+/* Layout */
+.app-root {
+  padding: 24px;
+  font-family: sans-serif;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.app-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 8px;
+}
+
+/* TitleEditor */
+.title-editor { margin-bottom: 16px; }
+.title-editor input {
+  width: 100%;
+  font-size: 20px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* SlideList */
+.slide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  max-height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.slide-thumb {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #111;
+  font-size: 14px;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+  outline: none;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.slide-thumb.active { 
+  border-color: rgba(0, 120, 215, 0.25); 
+  box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.1);
+}
+.slide-thumb.selected {
+  background: linear-gradient(180deg, rgba(0, 120, 215, 0.06), rgba(0, 120, 215, 0.03));
+  border-color: rgba(0, 120, 215, 0.12);
+}
+.slide-thumb.dragging {
+  opacity: 0.95;
+  transform: rotate(-0.5deg) scale(1.02);
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.35);
+  border-radius: 8px;
+}
+
+.slide-placeholder {
+  height: 10px;
+  margin: 0;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 16px;
+  background-color: #f4f4f4;
+  
+}
+
+.toolbar-left, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-control { display: inline-flex; align-items: center; gap: 8px; }
+.toolbar-text-controls { display: inline-flex; align-items: center; gap: 12px; margin-left: 12px; }
+.toolbar-label { font-size: 12px; display: block; margin-bottom: 2px; }
+.toolbar-font-controls { display: flex; gap: 8px; align-items: center; }
+.toolbar-font-input { width: 64px; }
+
+.toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.toolbar button:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toolbar input[type="number"] {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.toolbar select {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+/* 
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(20, 30, 50, 0.06);
+  gap: 12px;
+  font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+}
+
+.toolbar-left, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.6);
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.toolbar-text-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 12px;
+}
+
+.toolbar-label {
+  font-size: 11px;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 2px;
+  letter-spacing: 0.2px;
+}
+
+.toolbar-font-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbar-font-input {
+  width: 72px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  background: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* Buttons */
+.toolbar button {
+  padding: 8px 14px;
+  border: none;
+  background: linear-gradient(180deg,#ffffff,#f7f9fc);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #111827;
+  box-shadow: 0 2px 6px rgba(16,24,40,0.04);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.toolbar button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16,24,40,0.08);
+  background: linear-gradient(180deg,#ffffff,#f0f6ff);
+}
+
+.toolbar button.primary {
+  background: linear-gradient(180deg,#2563eb,#1e40af);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.18);
+}
+
+.toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Inputs and selects */
+.toolbar input[type="color"] {
+  width: 36px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  padding: 2px;
+}
+
+.toolbar input[type="number"], .toolbar select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  background: #fff;
+  min-width: 56px;
+  text-align: center;
+} */
+
+
+
+
+
+
+
+
+/* Workspace */
+.workspace-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 16px 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.workspace-clip {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.workspace-clip * {
+  pointer-events: auto;
+}
+
+.workspace {
+  --workspace-bg: #fff;
+  background: var(--workspace-bg);
+  position: relative;
+  width: 600px;
+  height: 400px;
+  border: 1px solid #999;
+  box-sizing: border-box;
+  overflow: visible;
+  margin: 0 auto;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Elements */
+.el {
+  position: absolute;
+  left: var(--el-left, 0);
+  top: var(--el-top, 0);
+  width: var(--el-width, 100px);
+  height: var(--el-height, 100px);
+  box-sizing: border-box;
+  padding: 0; /* Убрали внутренние отступы */
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+  overflow: visible; /* ВЕРНУЛИ visible чтобы ручки не обрезались */
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  will-change: left, top, transform;
+  background: transparent;
+}
+
+.el:hover {
+  border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.el.selected {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.el.editing {
+  border: 2px solid #10b981;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.el.text { 
+  white-space: pre-wrap; 
+  word-break: break-word;
+  cursor: text;
+  padding: 2px; /* Для текста оставили небольшой отступ */
+}
+
+.el .content {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden; /* Контент обрезаем, но ручки будут поверх */
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+  box-sizing: border-box;
+  font-size: var(--el-font-size, 16px);
+  font-family: var(--el-font-family, inherit);
+}
+
+/* ИСПРАВЛЕНИЕ: изображения теперь растягиваются полностью */
+.el img.content {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* Изменили с contain на fill */
+  display: block;
+  pointer-events: none;
+  background-color: transparent;
+}
+
+.inline-edit {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  outline: none;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: text;
+}
+
+/* Handles - ИСПРАВЛЕНИЕ: чтобы ручки не обрезались */
+.el .handle {
+  display: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  z-index: 2000;
+  pointer-events: auto;
+  box-sizing: border-box;
+  touch-action: none;
+  transform: translate(-50%, -50%);
+  transition: all 120ms ease;
+}
+
+.el.selected .handle, 
+.el.editing .handle, 
+.el:focus-within .handle { 
+  display: block; 
+}
+
+.handle-nw, .handle-ne, .handle-se, .handle-sw { 
+  width: 14px; 
+  height: 14px; 
+}
+
+/* Позиционирование ручек с учетом их размера */
+.handle-nw { left: 0; top: 0; cursor: nw-resize; }
+.handle-ne { left: 100%; top: 0; cursor: ne-resize; }
+.handle-se { left: 100%; top: 100%; cursor: se-resize; }
+.handle-sw { left: 0; top: 100%; cursor: sw-resize; }
+.handle-n { left: 50%; top: 0; cursor: n-resize; }
+.handle-s { left: 50%; top: 100%; cursor: s-resize; }
+.handle-e { left: 100%; top: 50%; cursor: e-resize; }
+.handle-w { left: 0; top: 50%; cursor: w-resize; }
+
+.el .handle:hover {
+  background-color: #3b82f6;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Увеличиваем область клика для ручек */
+.el .handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+/* Marquee */
+.marquee-selection {
+  position: absolute;
+  border: 2px dashed #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* File Controls */
+.file-controls { 
+  display: flex; 
+  gap: 8px; 
+  align-items: center; 
+  padding: 8px 16px;
+}
+
+.ribbon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ribbon-btn:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.ribbon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ribbon-icon {
+  margin-bottom: 4px;
+}
+
+.ribbon-label {
+  font-size: 12px;
+}
+
+.file-input-hidden { 
+  display: none; 
+}
+
+/* Responsive */
+@media (width <= 800px) {
+  .app-main { grid-template-columns: 1fr; }
+  .workspace { width: 100%; height: 320px; }
+}
+
+@media (pointer: coarse) {
+  .el .handle { width: 18px; height: 18px; }
+  .handle-nw, .handle-ne, .handle-se, .handle-sw { width: 20px; height: 20px; }
+  .el .handle::after { width: 36px; height: 36px; }
+}
+/* Добавляем в styles.css */
+.history-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.history-controls button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.history-controls button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+.history-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.history-controls button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+/* Добавить в конец файла */
+
+.auth-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-header {
+  background: #2c3e50;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+.auth-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 2rem;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.auth-tabs button {
+  padding: 1rem 2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-tabs button.active {
+  background: #3498db;
+  color: white;
+}
+
+.auth-tabs button:hover:not(.active) {
+  background: #ecf0f1;
+}
+
+.auth-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-form h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-form button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.auth-form button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.error {
+  background: #e74c3c;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+
+.user-info button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.user-info button:hover {
+  background: #c0392b;
+}
+/* Добавьте в ваш CSS файл */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background-color: #2c3e50;
+  color: white;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.app-header-left {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.app-header-center {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.app-header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.app-title-editor {
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.save-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.save-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.save-button:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+}
+
+.save-button.saving {
+  background-color: #f39c12;
+}
+
+.save-button.saved {
+  background-color: #27ae60;
+}
+
+.save-button.error {
+  background-color: #e74c3c;
+}
+
+.save-status {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.save-status.saving {
+  color: #f39c12;
+}
+
+.save-status.saved {
+  color: #27ae60;
+}
+
+.save-status.error {
+  color: #e74c3c;
+}
+
+.logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+/* Для поля редактирования названия */
+.TitleEditor {
+  width: 100%;
+}
+
+.TitleEditor input {
+  width: 100%;
+  padding: 5px 10px;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.TitleEditor input:focus {
+  outline: none;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-header * {
+  margin: 0;
+  padding: 0;
+}
+

@@ -1,0 +1,903 @@
+/* Reset / базовые */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial;
+  box-sizing: border-box;
+}
+
+/* Global */
+button {
+  cursor: pointer;
+}
+
+/* Layout / Positioning */
+.app-root {
+  padding: 24px;
+  font-family: sans-serif;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.app-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TitleEditor */
+.title-editor {
+  margin-bottom: 16px;
+}
+
+.title-editor input {
+  width: 100%;
+  font-size: 20px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* SlideList */
+.slide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  align-content: flex-start;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.slide-row-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.slide-thumb {
+  height: 64px;
+  width: 140px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 8%) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  transition:
+    transform 120ms ease,
+    opacity 120ms ease;
+  background-size: cover;
+  background-position: center;
+}
+.slide-thumb.active {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+.slide-thumb.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  cursor: grabbing;
+}
+
+.slide-placeholder {
+  height: 8px;
+  width: 100%;
+  background: rgb(60 128 255 / 12%);
+  border: 1px dashed rgb(60 128 255 / 25%);
+  margin: 4px 0;
+  border-radius: 3px;
+}
+
+/* --- Добавлено: визуализация мультивыделения и бейдж при перетаскивании --- */
+.slide-thumb.selected {
+  box-shadow: 0 0 0 2px #3b82f6;
+  outline: none;
+}
+
+.slide-thumb .group-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  background: rgb(0 0 0 / 60%);
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar .bg-input {
+  width: 40px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+/* Workspace base */
+.workspace {
+  --workspace-bg: #fff;
+
+  background: var(--workspace-bg);
+  position: relative;
+  width: 600px;
+  height: 400px;
+  border: 1px solid #999;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  overflow: visible;
+  background-repeat: no-repeat;
+  background-size: cover;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Element container using CSS variables for dynamic values */
+.el {
+  position: absolute;
+  left: var(--el-left, 0);
+  top: var(--el-top, 0);
+  width: var(--el-width, 100px);
+  height: var(--el-height, 100px);
+  box-sizing: border-box;
+  padding: 2px;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+  overflow: visible;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  will-change: left, top, transform;
+  background: transparent;
+}
+
+/* Dragging state: disable transitions and visual lift */
+.el.is-dragging {
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Visible selection state — accessible ring and subtle bg tint */
+.el.selected {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgb(59 130 246 / 18%),
+    0 2px 6px rgb(0 0 0 / 6%);
+  background-color: rgb(59 130 246 / 3%);
+}
+
+/* Editing state — stronger focus so inline-edit feels active */
+.el.editing {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgb(16 185 129 / 16%),
+    0 4px 12px rgb(0 0 0 / 6%);
+  background-color: rgb(16 185 129 / 2%);
+}
+
+/* Text-specific tweaks */
+.el.text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Content inside element */
+.el .content {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+  box-sizing: border-box;
+  font-size: var(--el-font-size, 16px);
+  font-family: var(--el-font-family, inherit);
+}
+
+/* Image content */
+.el img.content,
+.el .el-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background-color: #f3f7ff;
+  display: block;
+  pointer-events: none;
+}
+
+/* Inline edit input */
+.inline-edit {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  outline: none;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* -------------------------
+   Handles (PowerPoint-like)
+   ------------------------- */
+
+/* Base handle - circular points */
+.el .handle {
+  display: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 55%);
+  border-radius: 50%;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 12%);
+  position: absolute;
+  z-index: 2000;
+  pointer-events: auto;
+  box-sizing: border-box;
+  touch-action: none;
+  transform: translate(-50%, -50%);
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+/* Show handles on selected / editing / focus */
+.el.selected .handle,
+.el.editing .handle,
+.el:focus-within .handle {
+  display: block;
+}
+
+/* Corner handles slightly larger */
+.handle-nw,
+.handle-ne,
+.handle-se,
+.handle-sw {
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+}
+
+/* Edge handles */
+.handle-n,
+.handle-s,
+.handle-e,
+.handle-w {
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+}
+
+/* Corner positions */
+.handle-nw {
+  left: 0%;
+  top: 0%;
+  cursor: nwse-resize;
+}
+.handle-ne {
+  left: 100%;
+  top: 0%;
+  cursor: nesw-resize;
+}
+.handle-se {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+.handle-sw {
+  left: 0%;
+  top: 100%;
+  cursor: nesw-resize;
+}
+
+/* Edge positions */
+.handle-n {
+  left: 50%;
+  top: 0%;
+  cursor: ns-resize;
+}
+.handle-s {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+.handle-e {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+.handle-w {
+  left: 0%;
+  top: 50%;
+  cursor: ew-resize;
+}
+
+/* Hover/focus visual for circular handles */
+.el .handle:hover,
+.el .handle:focus {
+  background-color: #e6f0ff;
+  border-color: rgb(59 130 246 / 90%);
+  box-shadow: 0 2px 6px rgb(59 130 246 / 12%);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* Rotation handle: keep circular but slightly distinct size */
+.handle-rotate {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 55%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  left: 50%;
+  top: -22px;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+}
+
+/* small connector line from top-center to rotation handle */
+.el .rotate-connector {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 18px;
+  background: rgb(0 0 0 / 12%);
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1999;
+}
+
+/* Invisible larger pads behind handles for easier touch targeting */
+.el .handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+/* Accessibility: larger visual and hit area for coarse pointers */
+@media (pointer: coarse) {
+  .el .handle {
+    width: 18px;
+    height: 18px;
+  }
+  .handle-nw,
+  .handle-ne,
+  .handle-se,
+  .handle-sw {
+    width: 20px;
+    height: 20px;
+  }
+  .handle-rotate {
+    width: 24px;
+    height: 24px;
+    top: -28px;
+  }
+  .el .handle::after {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+  }
+}
+
+/* Hover lift for non-dragging elements */
+.workspace .el:not(.is-dragging):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgb(0 0 0 / 6%);
+}
+
+/* Inline element hover/active transitions */
+.workspace .el.is-dragging {
+  transition: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Small responsive tweak */
+@media (width <= 800px) {
+  .app-root {
+    grid-template-columns: 1fr;
+  }
+  .workspace {
+    width: 100%;
+    height: 320px;
+  }
+  .slide-thumb {
+    width: 86px;
+    height: 60px;
+  }
+}
+
+/* Image presentation tweaks */
+.el img.content {
+  width: 100%;
+  height: 100%;
+  object-fit: fill; /* деформирует изображение чтобы заполнить контейнер */
+}
+
+.el .el-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover; /* cover — заполнит контейнер, сохраняя центральную часть изображения */
+  object-position: center;
+  background-color: transparent; /* убирает видимую заливку вокруг изображения */
+  pointer-events: none;
+}
+
+/* Base handle - круглые точки (дублируется намеренно для совместимости) */
+.el .handle {
+  display: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 55%);
+  border-radius: 50%;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 12%);
+  position: absolute;
+  z-index: 2000;
+  pointer-events: auto;
+  box-sizing: border-box;
+  touch-action: none;
+  transform: translate(-50%, -50%);
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+/* Slightly larger for corner handles for easier grab */
+.handle-nw,
+.handle-ne,
+.handle-se,
+.handle-sw {
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+}
+
+/* Edge handles keep same size as base (12px) */
+.handle-n,
+.handle-s,
+.handle-e,
+.handle-w {
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+}
+
+/* Hover/focus visual for circular handles */
+.el .handle:hover,
+.el .handle:focus {
+  background-color: #e6f0ff;
+  border-color: rgb(59 130 246 / 90%);
+  box-shadow: 0 2px 6px rgb(59 130 246 / 12%);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+/* Rotation handle: keep circular but slightly distinct size */
+.handle-rotate {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 55%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  left: 50%;
+  top: -22px; /* поднял немного выше, т.к. размер увеличен */
+  transform: translate(-50%, -50%);
+  cursor: grab;
+}
+
+/* Invisible larger pads behind circular handles for easier touch targeting */
+.el .handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px; /* увеличенная зона */
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+/* Pointer-coarse adjustments */
+@media (pointer: coarse) {
+  .el .handle {
+    width: 18px;
+    height: 18px;
+  }
+  .handle-nw,
+  .handle-ne,
+  .handle-se,
+  .handle-sw {
+    width: 20px;
+    height: 20px;
+  }
+  .handle-rotate {
+    width: 24px;
+    height: 24px;
+    top: -28px;
+  }
+  .el .handle::after {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+  }
+}
+
+/* Центрируем workspace внутри страницы */
+.workspace-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 16px 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Позволяем элементам выходить за границы контейнера и оставаться видимыми */
+.workspace {
+  overflow: visible;
+  margin: 0 auto;
+  width: 600px;
+  height: 400px;
+}
+
+/* Контейнер, который обрезает горизонтальную видимую часть элементов,
+   чтобы ничего не заходило на левую боковую панель.
+   Вертикальный выход (top) оставляем видимым. */
+.workspace-clip {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden visible;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Workspace остаётся интерактивным внутри клипа */
+.workspace-clip .workspace {
+  pointer-events: auto;
+  margin: 0;
+  overflow: visible;
+}
+
+/* Чтобы всё, что выходит из workspace по горизонтали, не перекрывало панель,
+   панель имеет высокий z-index; при желании можно явно задавать порядок */
+.app-main {
+  display: grid;
+  grid-template-columns: 260px 1fr; /* фиксированная левая колонка + гибкая правая */
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Убедимся, что .workspace имеет фон и рамку — тогда панель справа/слева будет выглядеть корректно */
+.workspace {
+  background: var(--workspace-bg, #fff);
+  width: 600px;
+  height: 400px;
+  border: 1px solid #999;
+  box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+  margin: 0 auto;
+}
+
+/* Optional debug helper (uncomment while developing) */
+
+/*
+.workspace .el .handle.debug-show {
+  display: block !important;
+  background: rgba(255,80,80,0.9) !important;
+  z-index: 99999 !important;
+}
+*/
+
+/* Обёртка UI chrome — отвечает за toolbar, sidebar, file-controls и т.д. */
+.ui-chrome {
+  transform-origin: 0 0;
+  will-change: transform;
+  transition: transform 120ms linear;
+}
+
+/* Подстраиваем ширину контейнера, чтобы масштабированная обёртка не была обрезана.
+   Мы будем динамически менять её inline width в JS (widthScaled) */
+.ui-chrome__inner {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Защищаем workspace-область от обратного масштабирования (не применяем .ui-chrome к workspace) */
+.app-main {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 8px;
+}
+
+/* Container */
+.slide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  max-height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Thumb (slide item) */
+.slide-thumb {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: #111;
+  font-size: 14px;
+  user-select: none;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
+  outline: none;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+/* Active (current slide) */
+.slide-thumb.active {
+  border-color: rgb(0 120 215 / 25%);
+  box-shadow: 0 0 0 2px rgb(0 120 215 / 6%);
+}
+
+/* Selected (multi-select visual) */
+.slide-thumb.selected {
+  background: linear-gradient(180deg, rgb(0 120 215 / 6%), rgb(0 120 215 / 3%));
+  border-color: rgb(0 120 215 / 12%);
+}
+
+/* Focus visible for keyboard navigation */
+.slide-thumb:focus-visible {
+  box-shadow: 0 0 0 3px rgb(0 120 215 / 12%);
+  border-color: rgb(0 120 215 / 20%);
+}
+
+/* Placeholder insertion indicator */
+.slide-placeholder {
+  height: 10px;
+  margin: 0;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgb(0 0 0 / 6%), rgb(0 0 0 / 2%));
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 4%);
+}
+
+/* Placeholder visible spacing style when used between thumbs */
+.slide-placeholder + .slide-thumb,
+.slide-thumb + .slide-placeholder {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* Dragging clone visual (applied to clone element) */
+.slide-thumb.dragging {
+  opacity: 0.95;
+  transform: rotate(-0.5deg) scale(1.02);
+  box-shadow: 0 12px 30px rgb(16 24 40 / 35%);
+  border-radius: 8px;
+}
+
+/* Small badge for multi-drag count appended to clone */
+.slide-thumb .drag-count-badge,
+.dragging .drag-count-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: rgb(0 0 0 / 70%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Lightweight hover feedback */
+.slide-thumb:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgb(16 24 40 / 6%);
+}
+
+/* Disabled-like state (if needed) */
+.slide-thumb[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Scrollbar (optional, subtle) */
+.slide-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.slide-list::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / 6%);
+  border-radius: 999px;
+}
+
+.slide-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Responsive tweaks */
+@media (width <= 480px) {
+  .slide-thumb {
+    min-height: 48px;
+    padding: 8px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .slide-thumb .drag-count-badge,
+  .dragging .drag-count-badge {
+    right: 6px;
+    bottom: 6px;
+    padding: 1px 5px;
+    font-size: 11px;
+  }
+}
+
+/* marquee */
+.workspace {
+  position: relative;
+  overflow: auto;
+}
+
+.marquee {
+  border: 1px dashed rgb(75 140 255 / 95%);
+  background: rgb(75 140 255 / 12%);
+  box-sizing: border-box;
+  z-index: 9999;
+  pointer-events: none;
+}
+.marquee-selection {
+  border: 1px dashed rgba(75, 140, 255, 0.95);
+  background: rgba(0, 120, 215, 0.12);
+  pointer-events: none;
+  z-index: 9999;
+}
+/* Стили для Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #f4f4f4;  /* это за фон панели отвечает фон тулбара */
+  border-bottom: 1px solid #ffffff;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-text-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 12px;
+}
+
+.toolbar-label {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.toolbar-font-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbar-font-input {
+  width: 64px;
+}
+
+/* Стили для кнопок тулбара */
+.toolbar button {
+  padding: 6px 12px;
+  border: 1px solid #ffffff;
+  background-color: rgb(255, 255, 255);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Стили для input и select */
+.toolbar input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toolbar input[type="number"] {
+  padding: 4px;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.toolbar select {
+  padding: 4px;
+  border: 1px solid #ffffff;
+  border-radius: 4px;
+  background-color: rgb(255, 255, 255);
+  cursor: pointer;
+}
+
